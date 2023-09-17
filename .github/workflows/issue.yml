@@ -36,7 +36,7 @@ jobs:
           echo "LABEL_PRESENT=false" >> $GITHUB_ENV
         fi
 
-    - name: Check if Issue Was Opened More Than 2 Days Ago
+    - name: Check if Issue Was Opened More Than 2 Minutes Ago
       if: env.LABEL_PRESENT == 'true'
       run: |
         # Use GitHub API to get the issue's created timestamp
@@ -44,10 +44,10 @@ jobs:
 
         # Calculate the current date and 2 minutes ago
         current_date=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-        two_days_ago=$(date -u -d '2 days ago' +%Y-%m-%dT%H:%M:%SZ)
+        two_minutes_ago=$(date -u -d '2 minutes ago' +%Y-%m-%dT%H:%M:%SZ)
 
 
-        # Check if the issue was created more than 2 days ago
+        # Check if the issue was created more than 2 minute ago
         if [[ "$created_at" < "two_days_ago" ]]; then
           # Use GitHub API to assign the issue to Shubham
           username="Shubham9t9"
