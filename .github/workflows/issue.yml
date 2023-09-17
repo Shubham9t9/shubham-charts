@@ -4,13 +4,6 @@ on:
   schedule:
     - cron: "*/5 * * * *"
 
-  issues:
-    types:
-      - labeled
-      - opened
-      - edited
-      - syncronized
-
 jobs:
   escalate:
     runs-on: ubuntu-latest
@@ -19,26 +12,26 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: List all issues
+    - name: List issues with 'pager-duty' label
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
         issues=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
-          "https://api.github.com/repos/${{ github.repository }}/issues?state=all")
+          "https://api.github.com/repos/${{ github.repository }}/issues?state=open&labels=pager-duty")
 
-        echo "$issues" > all-issues.json
+        echo "$issues" > pager-duty-issues.json
 
     - name: Iterate through issues and escalate
       run: |
         TWO_MINUTES_AGO=$(date -u -d '2 minutes ago' --iso-8601=seconds)
 
-        for issue in $(cat all-issues.json | jq -c '.[]'); do
+        for issue in $(cat pager-duty-issues.json | jq -c '.[]'); do
           labels=$(echo "$issue" | jq -r '.labels[].name')
           state=$(echo "$issue" | jq -r '.state')
           created_at=$(echo "$issue" | jq -r '.created_at')
 
-          if [[ "$labels" =~ "pager-duty" ]] && [[ "$state" != "closed" ]] && [[ "$created_at" < "$TWO_MINUTES_AGO" ]]; then
+          if [[ "$state" != "closed" ]] && [[ "$created_at" < "$TWO_MINUTES_AGO" ]]; then
             issue_number=$(echo "$issue" | jq -r '.number')
             username="Shubham9t9"
 
